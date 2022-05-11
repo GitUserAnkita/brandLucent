@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId
 const {getPaymentToken, createCustomer, createPaymentMethod, makepayment, createCharges, connectCardWithCustomer, createProduct, price, getPaymentLink, checkout, createInvoice} = require("../services/payment");
 const { createPaypalPayment, excute } = require("../services/paypal");
-
+const { saveOrder } = require("./orderControllers");
 // stripe
 exports.generateToken = async(req,res)=>{
     try{
@@ -229,11 +229,18 @@ exports.generateInvoice = async(req, res)=>{
 
 exports.paypalPayment = async(req,res)=>{
     try{
-          var paymentJson = {
-              items : req.body.items,
-              amount : req.body.amount
-          }
-         
+        const productId = req.body.productId;
+        const userId = req.body.userId;
+        console.log("productId ===== ", productId, "userId ===", userId);
+        saveOrder(productId, userId);
+    
+        var paymentJson = {
+          productId: req.body.productId,
+          userId: req.body.userId,
+          items: req.body.items,
+          amount: req.body.amount,
+        };
+    
         createPaypalPayment(res,res,paymentJson);
     }catch(error){
         res.status(400).send({
